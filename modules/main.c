@@ -45,6 +45,11 @@
 #ifdef MODULE_BOARD_CONFIG
 #include "board_config.h"
 #endif
+#ifdef MODULE_CLI
+#include "cli.h"
+#endif
+
+#define BENCH_TEST
 
 /*-----------------------------------------------------------*/
 int main( void )
@@ -106,6 +111,10 @@ int main( void )
 
 #ifdef MODULE_BOARD_CONFIG
     board_config();
+#endif
+
+#ifdef MODULE_CLI
+    cli_init();
 #endif
 
     /* Start the tasks running. */

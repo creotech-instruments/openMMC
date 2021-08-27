@@ -76,6 +76,7 @@ licensing and training services.
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
 #define configAPPLICATION_ALLOCATED_HEAP        1
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
+#define configCOMMAND_INT_MAX_OUTPUT_SIZE       2096
 
 void vAssertCalled( char* file, uint32_t line);
 #define configASSERT( x )     if( ( x ) == 0 ) { vAssertCalled( __FILE__, __LINE__ );}
