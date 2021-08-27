@@ -40,6 +40,7 @@
 #include "fru.h"
 #include "led.h"
 #include "board_led.h"
+#include "board_config.h"
 
 
 /* payload states
@@ -63,7 +64,7 @@
  *       Wait until payload power goes down to restart the cycle
  */
 
-const external_gpio_t ext_gpios[15] = {
+const external_gpio_t ext_gpios[16] = {
         [EXT_GPIO_P1V5_VTT_EN] =     { 1, 7 },
         [EXT_GPIO_EN_P1V8] =         { 1, 6 },
         [EXT_GPIO_EN_P1V2] =         { 1, 5 },
@@ -78,6 +79,7 @@ const external_gpio_t ext_gpios[15] = {
         [EXT_GPIO_EN_RTM_PWR] =      { 0, 4 },
         [EXT_GPIO_EN_RTM_MP] =       { 0, 3 },
         [EXT_GPIO_FPGA_I2C_RESET] =  { 0, 2 },
+        [EXT_GPIO_DAC_VADJ_RSTn] =   { 0, 1 },
         [EXT_GPIO_PROGRAM_B] =       { 0, 0 }
 };
 
@@ -246,22 +248,33 @@ void payload_init( void )
 #ifdef MODULE_MCP23016
     if (!gpio_read_pin(PIN_PORT(GPIO_PGOOD_P1V0), PIN_NUMBER(GPIO_PGOOD_P1V0))){
 
-#ifdef MODULE_DAC_AD84XX
-        /* Configure the PVADJ DAC */
-        dac_ad84xx_init();
-        set_vadj_volt( 0, 2.5 );
-        set_vadj_volt( 1, 2.5 );
-#endif
-
         //set output on all pins
         mcp23016_set_port_dir(0, 0);
         mcp23016_set_port_dir(1, 0);
+
+#ifdef MODULE_DAC_AD84XX
+        /* Configure the PVADJ DAC */
+        mcp23016_write_pin( ext_gpios[EXT_GPIO_DAC_VADJ_RSTn].port_num, ext_gpios[EXT_GPIO_DAC_VADJ_RSTn].pin_num, false );
+        dac_ad84xx_init();
+        mcp23016_write_pin( ext_gpios[EXT_GPIO_DAC_VADJ_RSTn].port_num, ext_gpios[EXT_GPIO_DAC_VADJ_RSTn].pin_num, true );
+        set_vadj_volt( 0, 2.5 );
+        set_vadj_volt( 1, 2.5 );
+#endif
 
         gpio_set_pin_state(PIN_PORT(GPIO_FPGA_RESET), PIN_NUMBER(GPIO_FPGA_RESET), GPIO_LEVEL_LOW);
         gpio_set_pin_state(PIN_PORT(GPIO_FPGA_INITB), PIN_NUMBER(GPIO_FPGA_INITB), GPIO_LEVEL_LOW);
         mcp23016_write_pin( ext_gpios[EXT_GPIO_PROGRAM_B].port_num, ext_gpios[EXT_GPIO_PROGRAM_B].pin_num, false );
         mcp23016_write_pin( ext_gpios[EXT_GPIO_FPGA_I2C_RESET].port_num, ext_gpios[EXT_GPIO_FPGA_I2C_RESET].pin_num, true );
     }
+
+#ifdef MODULE_PTS
+
+        if (!gpio_read_pin(PIN_PORT(GPIO_RTM_PS), PIN_NUMBER(GPIO_RTM_PS))){
+            mcp23016_write_pin( ext_gpios[EXT_GPIO_EN_RTM_MP].port_num, ext_gpios[EXT_GPIO_EN_RTM_MP].pin_num, true );
+            mcp23016_write_pin( ext_gpios[EXT_GPIO_EN_RTM_PWR].port_num, ext_gpios[EXT_GPIO_EN_RTM_PWR].pin_num, true );
+        }
+#endif
+
 #endif
 }
 
@@ -341,7 +354,10 @@ void vTaskPayload( void *pvParameters )
 
         case PAYLOAD_STATE_FPGA_SETUP:
 
-            new_state = PAYLOAD_FPGA_ON;
+        	if (clock_switch_default_config()){
+        		new_state = PAYLOAD_FPGA_ON;
+        	}
+
             break;
 
         case PAYLOAD_FPGA_ON:
