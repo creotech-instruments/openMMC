@@ -211,6 +211,7 @@ static BaseType_t ClockSwitchCommand(char *pcWriteBuffer, size_t xWriteBufferLen
 static BaseType_t PtsCommand(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString)
 {
     char *command;
+    char *response[256] = {0};
     BaseType_t param_length;
 
     // Get command
@@ -218,7 +219,10 @@ static BaseType_t PtsCommand(char *pcWriteBuffer, size_t xWriteBufferLen, const 
 
     memset(pcWriteBuffer,0,strlen(pcWriteBuffer));
 
-    pts_command(command, pcWriteBuffer);
+    strcat(pcWriteBuffer, "RSP_START");
+    pts_command(command, response);
+    strcat(pcWriteBuffer, response);
+    strcat(pcWriteBuffer, "RSP_END");
 
     return pdFALSE;
 }
