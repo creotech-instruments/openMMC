@@ -21,10 +21,30 @@
 
 /* Project Includes */
 #include "port.h"
-
+#include "cli.h"
+#include "idt_8v54816.h"
 
 uint8_t clock_switch_default_config() {
+    uint8_t chan[16];
 
+    chan[0] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[1] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[2] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[3] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[4] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[5] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[6] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[7] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[8] =  IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH5;
+    chan[9] =  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[10] = IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P ;
+    chan[11] = IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH5;
+    chan[12] = IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH5;
+    chan[13] = IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH5;
+    chan[14] = IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH5;
+    chan[15] = IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH5;
+
+    return clock_switch_write_reg(chan);
 }
 
 void board_init() {
@@ -35,5 +55,6 @@ void board_init() {
 }
 
 void board_config() {
-	clock_switch_default_config();
+//	cli_init();
+//	clock_switch_default_config();
 }
