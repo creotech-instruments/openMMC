@@ -93,7 +93,7 @@ void pts_command(char *cmd, char *write_buffer)
 
 	}
 
-	else if (strcmp(cmd, "ipmb_address") == 0){
+	else if (strcmp(cmd, "ipmb") == 0){
 		ipmb_addr = get_ipmb_addr();
 		itoa(ipmb_addr, write_buffer, 10);
 	}
@@ -215,6 +215,16 @@ void pts_command(char *cmd, char *write_buffer)
 		gpio_set_pin_state( PIN_PORT(GPIO_FMC2_PG_C2M), PIN_NUMBER(GPIO_FMC2_PG_C2M), GPIO_LEVEL_HIGH);
 	}
 
+	else if (strcmp(cmd, "fmc_io_input") == 0){
+
+		gpio_set_pin_dir( PIN_PORT(GPIO_FMC1_PRSNT_M2C), PIN_NUMBER(GPIO_FMC1_PRSNT_M2C), GPIO_DIR_INPUT);
+		gpio_set_pin_dir( PIN_PORT(GPIO_FMC1_PG_M2C), PIN_NUMBER(GPIO_FMC1_PG_M2C), GPIO_DIR_INPUT);
+		gpio_set_pin_dir( PIN_PORT(GPIO_FMC1_PG_C2M), PIN_NUMBER(GPIO_FMC1_PG_C2M), GPIO_DIR_INPUT);
+		gpio_set_pin_dir( PIN_PORT(GPIO_FMC2_PRSNT_M2C), PIN_NUMBER(GPIO_FMC2_PRSNT_M2C), GPIO_DIR_INPUT);
+		gpio_set_pin_dir( PIN_PORT(GPIO_FMC2_PG_M2C), PIN_NUMBER(GPIO_FMC2_PG_M2C), GPIO_DIR_INPUT);
+		gpio_set_pin_dir( PIN_PORT(GPIO_FMC2_PG_C2M), PIN_NUMBER(GPIO_FMC2_PG_C2M), GPIO_DIR_INPUT);
+	}
+
 	else if (strcmp(cmd, "pin_done") == 0){
 		pin_state = gpio_read_pin(PIN_PORT(GPIO_FPGA_DONE_B), PIN_NUMBER(GPIO_FPGA_DONE_B));
 		itoa(pin_state, write_buffer, 10);
@@ -235,4 +245,4 @@ void pts_command(char *cmd, char *write_buffer)
 	else if (strcmp(cmd, "amc_write_fru") == 0){
 //		amc_write_fru();
 	}
-};
+ };
