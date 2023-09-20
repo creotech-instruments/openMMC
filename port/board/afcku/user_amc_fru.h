@@ -27,24 +27,24 @@
  * Common defines
  *********************************************/
 #define AMC_LANG_CODE               0
-#define AMC_FRU_FILE_ID             "AFCFRU"       //Allows knowing the source of the FRU present in the memory
+#define AMC_FRU_FILE_ID             "AFCKUFRU"       //Allows knowing the source of the FRU present in the memory
 
 /*********************************************
  * Board information area
  *********************************************/
 #define AMC_BOARD_MANUFACTURING_TIME 13076640               /* Amount of minutes since 0:00 1/1/96 */
 #define AMC_BOARD_MANUFACTURER      "Creotech"
-#define AMC_BOARD_NAME              "AMC-FMC-Carrier"
+#define AMC_BOARD_NAME              "AMC-FMC-Carrier-Kintex-Ultrascale"
 #define AMC_BOARD_SN                "CNxxxxx"
-#define AMC_BOARD_PN                "AFC"
+#define AMC_BOARD_PN                "AFCKU"
 
 /*********************************************
  * Product information area
  *********************************************/
 #define AMC_PRODUCT_MANUFACTURER    "Creotech"
-#define AMC_PRODUCT_NAME            "AFC"
-#define AMC_PRODUCT_PN              "AFC:4.0"
-#define AMC_PRODUCT_VERSION         "4.0"
+#define AMC_PRODUCT_NAME            "AFCKU"
+#define AMC_PRODUCT_PN              "AFCKU:1.0"
+#define AMC_PRODUCT_VERSION         "1.0"
 #define AMC_PRODUCT_SN              "CNxxxxx"
 #define AMC_PRODUCT_ASSET_TAG       "Generic FRU"
 

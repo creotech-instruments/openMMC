@@ -21,20 +21,20 @@
  */
 
 /**
- * @defgroup AFC_V4_0 AFCv4.0 Board Port
+ * @defgroup AFCKU_V1_0 AFCKUv1.0 Board Port
  * @ingroup BOARD_PORTS
  */
 
 /**
- * @file afc-v4/pin_mapping.h
- * @brief Hardware pin definitions for AFCv4.0
+ * @file afcku/pin_mapping.h
+ * @brief Hardware pin definitions for AFCKUv1.0
  *
- * @ingroup AFC_V4_0_PIN_MAPPING
+ * @ingroup AFCKU_V1_0_PIN_MAPPING
  */
 
 /**
- * @defgroup AFC_V4_0_PIN_MAPPING AFCv4.0 Pin Mapping
- * @ingroup AFC_V4_0
+ * @defgroup AFCKU_V1_0_PIN_MAPPING AFCKUv1.0 Pin Mapping
+ * @ingroup AFCKU_V1_0
  * @{
  */
 
@@ -66,12 +66,6 @@
 #define SSP0_SSEL                       PIN_DEF( PORT1, 21, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_OUTPUT )
 #define SSP0_MISO                       PIN_DEF( PORT1, 23, (IOCON_FUNC3 | IOCON_MODE_INACT), NON_GPIO )
 #define SSP0_MOSI                       PIN_DEF( PORT1, 24, (IOCON_FUNC3 | IOCON_MODE_INACT), NON_GPIO )
-
-/* SPI Legacy port - should be updated to SSP interface */
-/* DAC SPI Port (SSEL is GPIO for word transfers larger than 8bits) */
-#define SPI_SCK                         PIN_DEF( PORT0, 15, (IOCON_FUNC3 | IOCON_MODE_INACT), NON_GPIO )
-#define SPI_SSEL                        PIN_DEF( PORT0, 16, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_OUTPUT )
-#define SPI_MOSI                        PIN_DEF( PORT0, 18, (IOCON_FUNC3 | IOCON_MODE_INACT), NON_GPIO )
 
 /* Tracedata */
 #define TRACEDATA3                      PIN_DEF( PORT2,  2, (IOCON_FUNC3 | IOCON_MODE_INACT), NON_GPIO )
@@ -141,9 +135,6 @@
 #define GPIO_FPGA_INITB                 PIN_DEF( PORT0, 20, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_OUTPUT )
 #define GPIO_FPGA_RESET                 PIN_DEF( PORT2,  9, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_OUTPUT )
 
-/* VADJ DAC */
-#define GPIO_DAC_VADJ_RST               PIN_DEF( PORT0, 21, (IOCON_FUNC0 | IOCON_MODE_PULLUP), GPIO_DIR_OUTPUT )
-
 /* MMC ENABLE# */
 #define GPIO_MMC_ENABLE                 PIN_DEF( PORT2,  8, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 
@@ -184,9 +175,6 @@
          SSP0_SSEL,                             \
          SSP0_MISO,                             \
          SSP0_MOSI,                             \
-         SPI_SCK,                               \
-         SPI_SSEL,                              \
-         SPI_MOSI,                              \
          TRACEDATA3,                            \
          TRACEDATA2,                            \
          TRACEDATA1,                            \
@@ -227,7 +215,6 @@
          GPIO_FPGA_DONE_B,                      \
          GPIO_FPGA_INITB,                       \
          GPIO_FPGA_RESET,                       \
-         GPIO_DAC_VADJ_RST,                     \
          GPIO_MMC_ENABLE,                       \
          GPIO_OVERTEMPn,                        \
          GPIO_FMC1_JTAG_Override,               \

@@ -22,15 +22,15 @@
  */
 
 /**
- * @file afcv4/payload.h
- * @brief Payload control module definitions for AFCv4.0
+ * @file afcku/payload.h
+ * @brief Payload control module definitions for AFCKUv1.0
  *
- * @ingroup AFC_V4_0_PAYLOAD
+ * @ingroup AFCKU_V1_0_PAYLOAD
  */
 
 /**
- * @defgroup AFC_V4_0_PAYLOAD AFCv4 Payload Control
- * @ingroup AFC_V4_0
+ * @defgroup AFCKU_V1_0_PAYLOAD AFCKU Payload Control
+ * @ingroup AFCKU_V1_0
  * @{
  */
 
@@ -53,8 +53,8 @@ enum {
 } payload_state;
 
 /**
- * @defgroup AFC_V4_0_PAYLOAD_MSG Payload Messages Codes
- * @ingroup AFC_V4_0_PAYLOAD
+ * @defgroup AFCKU_V1_0_PAYLOAD_MSG Payload Messages Codes
+ * @ingroup AFCKU_V1_0_PAYLOAD
  * @{
  */
 #define PAYLOAD_MESSAGE_COLD_RST        (1 << 0)

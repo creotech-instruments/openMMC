@@ -34,7 +34,6 @@
 #include "ipmi.h"
 #include "task_priorities.h"
 #include "mcp23016.h"
-#include "ad84xx.h"
 #include "hotswap.h"
 #include "utils.h"
 #include "fru.h"
@@ -83,7 +82,7 @@ const external_gpio_t ext_gpios[15] = {
 
 
 /**
- * @brief Set AFC's DCDC Converters state
+ * @brief Set AFCKU's DCDC Converters state
  *
  * @param on DCDCs state
  *
@@ -183,21 +182,6 @@ uint8_t payload_check_pgood()
     return 0;
 }
 
-#ifdef MODULE_DAC_AD84XX
-void set_vadj_volt( uint8_t fmc_slot, float v )
-{
-    uint32_t res_total;
-    uint32_t res_dac;
-
-    res_total = (uint32_t) (1162.5/(v-0.775)) - 453;
-    res_dac = (1800*res_total)/(1800-res_total);
-
-    /* Use only the lower 8-bits (the dac only has 256 steps) */
-    res_dac &= 0xFF;
-
-    dac_ad84xx_set_res( fmc_slot, res_dac );
-}
-#endif
 
 EventGroupHandle_t amc_payload_evt = NULL;
 #ifdef MODULE_RTM
@@ -245,13 +229,6 @@ void payload_init( void )
 
 #ifdef MODULE_MCP23016
     if (!gpio_read_pin(PIN_PORT(GPIO_PGOOD_P1V0), PIN_NUMBER(GPIO_PGOOD_P1V0))){
-
-#ifdef MODULE_DAC_AD84XX
-        /* Configure the PVADJ DAC */
-        dac_ad84xx_init();
-        set_vadj_volt( 0, 2.5 );
-        set_vadj_volt( 1, 2.5 );
-#endif
 
         //set output on all pins
         mcp23016_set_port_dir(0, 0);

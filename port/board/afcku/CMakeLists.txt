@@ -4,7 +4,7 @@ if (NOT TARGET_CONTROLLER)
 endif()
 
 if (NOT TARGET_BOARD_NAME)
-  set(TARGET_BOARD_NAME "AFC v4" CACHE STRING "Board Name")
+  set(TARGET_BOARD_NAME "AFCKU" CACHE STRING "Board Name")
 endif()
 
 #List all modules used by this board
@@ -13,7 +13,7 @@ set(TARGET_MODULES
   "PAYLOAD"
   "SDR"
   "WATCHDOG"
-  "DAC_AD84XX"
+  # "DAC_AD84XX"
   "HOTSWAP_SENSOR"
   "EEPROM_AT24MAC"
   "LM75"
