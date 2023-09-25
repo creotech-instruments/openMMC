@@ -12,7 +12,6 @@ set(TARGET_MODULES
   "FRU"
   "PAYLOAD"
   "SDR"
-  "WATCHDOG"
   # "DAC_AD84XX"
   "HOTSWAP_SENSOR"
   "EEPROM_AT24MAC"
@@ -25,7 +24,12 @@ set(TARGET_MODULES
   "ADC"
   "BOARD_CONFIG"
   "IDT_8V54816"
+  "DISABLE_SPI"
   )
+
+if (NOT DISABLE_WATCHDOG)
+  list(APPEND TARGET_MODULES "WATCHDOG")
+endif()
 
 set(BOARD_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -53,6 +57,11 @@ if (FRU_WRITE_EEPROM)
   message(STATUS "FRU EEPROM will be written if no valid data is found!")
   set(MODULES_FLAGS "${MODULES_FLAGS} -DFRU_WRITE_EEPROM")
   set(FRU_WRITE_EEPROM false CACHE BOOL "Set this flag to enable writing the board ID on the EEPROM" FORCE)
+endif()
+
+#Add flag for disabling SPI
+if (";${TARGET_MODULES};" MATCHES ";DISABLE_SPI;")
+  set(MODULES_FLAGS "${MODULES_FLAGS} -DSPI_DISABLE")
 endif()
 
 #Set the variables in the main scope
