@@ -28,6 +28,8 @@
 #ifndef PORT_H_
 #define PORT_H_
 
+#define BENCH_TEST
+
 /* List of all LPC17xx specific headers to be included */
 
 #include "chip_lpc175x_6x.h"

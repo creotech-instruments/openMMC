@@ -457,6 +457,10 @@ void vTaskPayload( void *pvParameters )
 #include "flash_spi.h"
 #include "string.h"
 
+uint8_t *hpm_page = NULL;
+uint8_t hpm_pg_index;
+uint32_t hpm_page_addr;
+
 uint8_t payload_hpm_prepare_comp( void )
 {
     return IPMI_CC_ILLEGAL_COMMAND_DISABLED;

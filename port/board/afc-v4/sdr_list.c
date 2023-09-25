@@ -298,17 +298,17 @@ const SDR_type_01h_t SDR_FMC1_VADJ = {
     .acc_exp_sensor_dir = 0x00, /* Sensor direction */
     .Rexp_Bexp = 0xD0, /* R-Exp , B-Exp */
     .analog_flags = 0x00, /* Analogue characteristics flags */
-//    .nominal_reading = 39, /* Nominal reading */
-//    .normal_max = 47, /* Normal maximum */
-//    .normal_min = 0, /* Normal minimum */
-//    .sensor_max_reading = 0xFF, /* Sensor Maximum reading */
-//    .sensor_min_reading = 0x00, /* Sensor Minimum reading */
-//    .upper_nonrecover_thr = 51, /* Upper non-recoverable Threshold */
-//    .upper_critical_thr = 46, /* Upper critical Threshold */
-//    .upper_noncritical_thr = 43, /* Upper non critical Threshold */
-//    .lower_nonrecover_thr = 28, /* Lower non-recoverable Threshold */
-//    .lower_critical_thr = 32, /* Lower critical Threshold */
-//    .lower_noncritical_thr = 36, /* Lower non-critical Threshold */
+    .nominal_reading = 39, /* Nominal reading */
+    .normal_max = 47, /* Normal maximum */
+    .normal_min = 0, /* Normal minimum */
+    .sensor_max_reading = 0xFF, /* Sensor Maximum reading */
+    .sensor_min_reading = 0x00, /* Sensor Minimum reading */
+    .upper_nonrecover_thr = 51, /* Upper non-recoverable Threshold */
+    .upper_critical_thr = 46, /* Upper critical Threshold */
+    .upper_noncritical_thr = 43, /* Upper non critical Threshold */
+    .lower_nonrecover_thr = 28, /* Lower non-recoverable Threshold */
+    .lower_critical_thr = 32, /* Lower critical Threshold */
+    .lower_noncritical_thr = 36, /* Lower non-critical Threshold */
     .pos_thr_hysteresis = 1, /* positive going Threshold hysteresis value */
     .neg_thr_hysteresis = 1, /* negative going Threshold hysteresis value */
     .reserved1 = 0x00, /* reserved */
@@ -351,17 +351,17 @@ const SDR_type_01h_t SDR_FMC1_P3V3 = {
     .acc_exp_sensor_dir = 0x00, /* Sensor direction */
     .Rexp_Bexp = 0xD0, /* R-Exp , B-Exp */
     .analog_flags = 0x00, /* Analogue characteristics flags */
-//    .nominal_reading = 52, /* Nominal reading */
-//    .normal_max = 59, /* Normal maximum */
-//    .normal_min = 45, /* Normal minimum */
-//    .sensor_max_reading = 0xFF, /* Sensor Maximum reading */
-//    .sensor_min_reading = 0x00, /* Sensor Minimum reading */
-//    .upper_nonrecover_thr = 62, /* Upper non-recoverable Threshold */
-//    .upper_critical_thr = 59, /* Upper critical Threshold */
-//    .upper_noncritical_thr = 55, /* Upper non critical Threshold */
-//    .lower_nonrecover_thr = 42, /* Lower non-recoverable Threshold */
-//    .lower_critical_thr = 45, /* Lower critical Threshold */
-//    .lower_noncritical_thr = 48, /* Lower non-critical Threshold */
+    .nominal_reading = 52, /* Nominal reading */
+    .normal_max = 59, /* Normal maximum */
+    .normal_min = 45, /* Normal minimum */
+    .sensor_max_reading = 0xFF, /* Sensor Maximum reading */
+    .sensor_min_reading = 0x00, /* Sensor Minimum reading */
+    .upper_nonrecover_thr = 62, /* Upper non-recoverable Threshold */
+    .upper_critical_thr = 59, /* Upper critical Threshold */
+    .upper_noncritical_thr = 55, /* Upper non critical Threshold */
+    .lower_nonrecover_thr = 42, /* Lower non-recoverable Threshold */
+    .lower_critical_thr = 45, /* Lower critical Threshold */
+    .lower_noncritical_thr = 48, /* Lower non-critical Threshold */
     .pos_thr_hysteresis = 2, /* positive going Threshold hysteresis value */
     .neg_thr_hysteresis = 2, /* negative going Threshold hysteresis value */
     .reserved1 = 0x00, /* reserved */
@@ -459,17 +459,17 @@ const SDR_type_01h_t SDR_FMC2_VADJ = {
     .acc_exp_sensor_dir = 0x00, /* Sensor direction */
     .Rexp_Bexp = 0xD0, /* R-Exp , B-Exp */
     .analog_flags = 0x00, /* Analogue characteristics flags */
-//    .nominal_reading = 39, /* Nominal reading */
-//    .normal_max = 47, /* Normal maximum */
-//    .normal_min = 0, /* Normal minimum */
-//    .sensor_max_reading = 0xFF, /* Sensor Maximum reading */
-//    .sensor_min_reading = 0x00, /* Sensor Minimum reading */
-//    .upper_nonrecover_thr = 51, /* Upper non-recoverable Threshold */
-//    .upper_critical_thr = 46, /* Upper critical Threshold */
-//    .upper_noncritical_thr = 43, /* Upper non critical Threshold */
-//    .lower_nonrecover_thr = 28, /* Lower non-recoverable Threshold */
-//    .lower_critical_thr = 32, /* Lower critical Threshold */
-//    .lower_noncritical_thr = 36, /* Lower non-critical Threshold */
+    .nominal_reading = 39, /* Nominal reading */
+    .normal_max = 47, /* Normal maximum */
+    .normal_min = 0, /* Normal minimum */
+    .sensor_max_reading = 0xFF, /* Sensor Maximum reading */
+    .sensor_min_reading = 0x00, /* Sensor Minimum reading */
+    .upper_nonrecover_thr = 51, /* Upper non-recoverable Threshold */
+    .upper_critical_thr = 46, /* Upper critical Threshold */
+    .upper_noncritical_thr = 43, /* Upper non critical Threshold */
+    .lower_nonrecover_thr = 28, /* Lower non-recoverable Threshold */
+    .lower_critical_thr = 32, /* Lower critical Threshold */
+    .lower_noncritical_thr = 36, /* Lower non-critical Threshold */
     .pos_thr_hysteresis = 1, /* positive going Threshold hysteresis value */
     .neg_thr_hysteresis = 1, /* negative going Threshold hysteresis value */
     .reserved1 = 0x00, /* reserved */
@@ -514,17 +514,17 @@ const SDR_type_01h_t SDR_FMC2_P3V3 = {
     .acc_exp_sensor_dir = 0x00, /* Sensor direction */
     .Rexp_Bexp = 0xD0, /* R-Exp , B-Exp */
     .analog_flags = 0x00, /* Analogue characteristics flags */
-//    .nominal_reading = 52, /* Nominal reading */
-//    .normal_max = 59, /* Normal maximum */
-//    .normal_min = 45, /* Normal minimum */
-//    .sensor_max_reading = 0xFF, /* Sensor Maximum reading */
-//    .sensor_min_reading = 0x00, /* Sensor Minimum reading */
-//    .upper_nonrecover_thr = 62, /* Upper non-recoverable Threshold */
-//    .upper_critical_thr = 59, /* Upper critical Threshold */
-//    .upper_noncritical_thr = 55, /* Upper non critical Threshold */
-//    .lower_nonrecover_thr = 42, /* Lower non-recoverable Threshold */
-//    .lower_critical_thr = 45, /* Lower critical Threshold */
-//    .lower_noncritical_thr = 48, /* Lower non-critical Threshold */
+    .nominal_reading = 52, /* Nominal reading */
+    .normal_max = 59, /* Normal maximum */
+    .normal_min = 45, /* Normal minimum */
+    .sensor_max_reading = 0xFF, /* Sensor Maximum reading */
+    .sensor_min_reading = 0x00, /* Sensor Minimum reading */
+    .upper_nonrecover_thr = 62, /* Upper non-recoverable Threshold */
+    .upper_critical_thr = 59, /* Upper critical Threshold */
+    .upper_noncritical_thr = 55, /* Upper non critical Threshold */
+    .lower_nonrecover_thr = 42, /* Lower non-recoverable Threshold */
+    .lower_critical_thr = 45, /* Lower critical Threshold */
+    .lower_noncritical_thr = 48, /* Lower non-critical Threshold */
     .pos_thr_hysteresis = 2, /* positive going Threshold hysteresis value */
     .neg_thr_hysteresis = 2, /* negative going Threshold hysteresis value */
     .reserved1 = 0x00, /* reserved */
@@ -1260,16 +1260,17 @@ void amc_sdr_init( void )
     /* INA3221 sensors */
 #ifdef MODULE_INA3221_VOLTAGE
 
-    /* AMC RTM Voltage */
-    sdr_insert_entry( TYPE_01, (void *) &SDR_AMC_12V, &vTaskINA3221_Handle, 0, CHIP_ID_INA_0 );
-    sdr_insert_entry( TYPE_01, (void *) &SDR_RTM_12V, &vTaskINA3221_Handle, 0, CHIP_ID_INA_0 );
-    sdr_add_settings(CHIP_ID_INA_0, (void *) &INA3221_SETTINGS);
+//    /* AMC RTM Voltage */
+//    sdr_insert_entry( TYPE_01, (void *) &SDR_AMC_12V, &vTaskINA3221_Handle, 0, CHIP_ID_INA_0 );
+//    sdr_insert_entry( TYPE_01, (void *) &SDR_RTM_12V, &vTaskINA3221_Handle, 0, CHIP_ID_INA_0 );
+//    sdr_add_settings(CHIP_ID_INA_0, (void *) &INA3221_SETTINGS);
 
-    /* FMC1 Voltage */
-    sdr_insert_entry( TYPE_01, (void *) &SDR_FMC1_12V, &vTaskINA3221_Handle, FMC1_12V_DEVID, CHIP_ID_INA_1 );
-    sdr_insert_entry( TYPE_01, (void *) &SDR_FMC1_VADJ, &vTaskINA3221_Handle, FMC1_VADJ_DEVID, CHIP_ID_INA_1 );
-    sdr_insert_entry( TYPE_01, (void *) &SDR_FMC1_P3V3, &vTaskINA3221_Handle, FMC1_P3V3_DEVID, CHIP_ID_INA_1 );
-    sdr_add_settings(CHIP_ID_INA_1, (void *) &INA3221_SETTINGS);
+//    /* FMC1 Voltage */
+//    sdr_insert_entry( TYPE_01, (void *) &SDR_FMC1_12V, &vTaskINA3221_Handle, FMC1_12V_DEVID, CHIP_ID_INA_1 );
+//    sdr_insert_entry( TYPE_01, (void *) &SDR_FMC1_VADJ, &vTaskINA3221_Handle, FMC1_VADJ_DEVID, CHIP_ID_INA_1 );
+//    sdr_insert_entry( TYPE_01, (void *) &SDR_FMC1_P3V3, &vTaskINA3221_Handle, FMC1_P3V3_DEVID, CHIP_ID_INA_1 );
+//    sdr_add_settings(CHIP_ID_INA_1, (void *) &INA3221_SETTINGS);
+//
 
     /* FMC2 Voltage */
     sdr_insert_entry( TYPE_01, (void *) &SDR_FMC2_12V, &vTaskINA3221_Handle, FMC2_12V_DEVID, CHIP_ID_INA_2 );
