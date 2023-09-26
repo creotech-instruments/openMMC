@@ -56,6 +56,16 @@ if (";${TARGET_MODULES};" MATCHES ";BOARD_CONFIG;")
   set(MODULES_FLAGS "${MODULES_FLAGS} -DMODULE_BOARD_CONFIG")
 endif()
 
+if (";${TARGET_MODULES};" MATCHES ";CLI;")
+  set(PROJ_SRCS ${PROJ_SRCS} ${BOARD_PATH}/cli_commands.c)
+  set(MODULES_FLAGS "${MODULES_FLAGS} -DMODULE_CLI")
+endif()
+
+if (";${TARGET_MODULES};" MATCHES ";PTS;")
+  set(PROJ_SRCS ${PROJ_SRCS} ${BOARD_PATH}/pts_commands.c)
+  set(MODULES_FLAGS "${MODULES_FLAGS} -DMODULE_PTS")
+endif()
+
 #Extra definitions
 if (FRU_WRITE_EEPROM)
   message(STATUS "FRU EEPROM will be written if no valid data is found!")
