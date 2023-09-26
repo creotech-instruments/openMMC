@@ -65,21 +65,35 @@
 const external_gpio_t ext_gpios[15] = {
         [EXT_GPIO_P1V5_VTT_EN] =     { 1, 7 },
         [EXT_GPIO_EN_P1V8] =         { 1, 6 },
-        [EXT_GPIO_EN_P1V2] =         { 1, 5 },
+        [EXT_GPIO_EN_P1V5] =         { 1, 5 },
         [EXT_GPIO_EN_FMC1_P12V] =    { 1, 4 },
         [EXT_GPIO_EN_FMC2_P12V] =    { 1, 3 },
-        [EXT_GPIO_EN_FMC1_PVADJ] =   { 1, 2 },
-        [EXT_GPIO_EN_FMC2_PVADJ] =   { 1, 1 },
+        [EXT_GPIO_EN_FMC1_1V8]  =    { 1, 2 },
+        [EXT_GPIO_EN_FMC2_1V8]  =    { 1, 1 },
         [EXT_GPIO_EN_FMC1_P3V3] =    { 1, 0 },
         [EXT_GPIO_EN_FMC2_P3V3] =    { 0, 7 },
-        [EXT_GPIO_EN_P1V0] =         { 0, 6 },
-        [EXT_GPIO_EN_P3V3] =         { 0, 5 },
+        [EXT_GPIO_EN_VCCINT]  =      { 0, 6 },
+        [EXT_GPIO_EN_P3V3]    =      { 0, 5 },
         [EXT_GPIO_EN_RTM_PWR] =      { 0, 4 },
-        [EXT_GPIO_EN_RTM_MP] =       { 0, 3 },
+        [EXT_GPIO_EN_RTM_MP]  =      { 0, 3 },
         [EXT_GPIO_FPGA_I2C_RESET] =  { 0, 2 },
         [EXT_GPIO_PROGRAM_B] =       { 0, 0 }
 };
 
+uint8_t payload_continue = 0;
+
+void suspendPayload(char* msg_return)
+{
+  while(1)
+  {
+    if(payload_continue == 1)
+    {
+      printf("%s\n", msg_return);
+      payload_continue = 0;
+      return;
+    }
+  }
+}
 
 /**
  * @brief Set AFCKU's DCDC Converters state
@@ -91,17 +105,17 @@ const external_gpio_t ext_gpios[15] = {
 uint8_t setDC_DC_ConvertersON(bool on)
 {
     uint8_t power_pins[] = {
-            EXT_GPIO_EN_P1V0,
+            EXT_GPIO_EN_VCCINT,
             EXT_GPIO_EN_P1V8,
             EXT_GPIO_EN_P3V3,
-            EXT_GPIO_EN_FMC1_PVADJ,
-            EXT_GPIO_EN_FMC2_PVADJ,
+            EXT_GPIO_EN_P1V5,
             EXT_GPIO_P1V5_VTT_EN,
-            EXT_GPIO_EN_P1V2,
+            EXT_GPIO_EN_FMC1_1V8,
             EXT_GPIO_EN_FMC1_P12V,
             EXT_GPIO_EN_FMC1_P3V3,
+            EXT_GPIO_EN_FMC2_1V8,
             EXT_GPIO_EN_FMC2_P12V,
-            EXT_GPIO_EN_FMC2_P3V3
+            EXT_GPIO_EN_FMC2_P3V3,
     };
 
     uint8_t pin;
@@ -110,6 +124,10 @@ uint8_t setDC_DC_ConvertersON(bool on)
 
         for (uint8_t i = 0; i < (sizeof(power_pins) / sizeof(power_pins[0])); i++) {
             pin = power_pins[i];
+
+            printf("Send \'continue\' to enable power_pins[%d]\n\r", i);
+            suspendPayload("OK");
+
             mcp23016_write_pin( ext_gpios[pin].port_num, ext_gpios[pin].pin_num, true );
             vTaskDelay(10);
         }
@@ -214,6 +232,8 @@ void payload_init( void )
         while ( gpio_read_pin( PIN_PORT(GPIO_MMC_ENABLE), PIN_NUMBER(GPIO_MMC_ENABLE) ) == 1 ) {};
     }
 
+    payload_continue = 0;
+
     xTaskCreate( vTaskPayload, "Payload", 120, NULL, tskPAYLOAD_PRIORITY, &vTaskPayload_Handle );
 
     amc_payload_evt = xEventGroupCreate();
@@ -299,6 +319,9 @@ void vTaskPayload( void *pvParameters )
             /* Turn DDC converters on */
             if ( DCDC_good == 0 ){
                 setDC_DC_ConvertersON( true );
+
+                printf("PAYLOAD_POWER_GOOD_WAIT finished, send \'continue\'\n\r");
+                suspendPayload("OK");
             }
 
             /* Clear hotswap sensor backend power failure bits */

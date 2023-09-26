@@ -35,11 +35,16 @@ set(LIBLPCOPEN_SRCS
   ${LPCOPEN_SRCPATH}/wwdt_17xx_40xx.c
 
   ${LPC17XX_PATH}/lpc17_i2c.c
-  ${LPC17XX_PATH}/lpc17_spi.c
   ${LPC17XX_PATH}/lpc17_ssp.c
   ${LPC17XX_PATH}/lpc17_hpm.c
   ${LPC17XX_PATH}/lpc17_pincfg.c
   )
+
+if (NOT ";${TARGET_BOARD_NAME};" MATCHES ";AFCKU;")
+  set(LIBLPCOPEN_SRCS ${LIBLPCOPEN_SRCS} ${LPC17XX_PATH}/lpc17_spi.c)
+else()
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSPI_DISABLE")
+endif()
 
 if( UART_RINGBUFFER )
   set(LIBLPCOPEN_SRCS ${LIBLPCOPEN_SRCS} ${LPCOPEN_SRCPATH}/ring_buffer.c ${LPC17XX_PATH}/lpc17_uartrb.c)

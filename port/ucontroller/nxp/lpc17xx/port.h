@@ -36,7 +36,9 @@
 #include "lpc17_gpio.h"
 #include "lpc17_i2c.h"
 #include "lpc17_ssp.h"
+#ifndef SPI_DISABLE
 #include "lpc17_spi.h"
+#endif
 #include "lpc17_watchdog.h"
 #include "lpc17_interruptions.h"
 #include "lpc17_hpm.h"

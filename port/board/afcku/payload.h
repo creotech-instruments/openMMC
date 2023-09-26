@@ -72,13 +72,13 @@ typedef struct external_gpio {
 } external_gpio_t;
 
 enum {
-	EXT_GPIO_EN_P1V0,
+	EXT_GPIO_EN_VCCINT,
 	EXT_GPIO_EN_P1V8,
 	EXT_GPIO_EN_P3V3,
-	EXT_GPIO_EN_FMC1_PVADJ,
-	EXT_GPIO_EN_FMC2_PVADJ,
+	EXT_GPIO_EN_FMC1_1V8,
+	EXT_GPIO_EN_FMC2_1V8,
 	EXT_GPIO_P1V5_VTT_EN,
-	EXT_GPIO_EN_P1V2,
+	EXT_GPIO_EN_P1V5,
 	EXT_GPIO_EN_FMC1_P12V,
 	EXT_GPIO_EN_FMC1_P3V3,
 	EXT_GPIO_EN_FMC2_P12V,
@@ -131,6 +131,8 @@ uint8_t payload_hpm_finish_upload( uint32_t image_size );
 uint8_t payload_hpm_get_upgrade_status( void );
 uint8_t payload_hpm_activate_firmware( void );
 #endif
+
+extern uint8_t payload_continue;
 
 #endif /* IPMI_PAYLOAD_H_ */
 

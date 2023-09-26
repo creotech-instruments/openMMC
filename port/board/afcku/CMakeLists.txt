@@ -1,18 +1,13 @@
 #Select which microcontroller and board are being used
-if (NOT TARGET_CONTROLLER)
-  set(TARGET_CONTROLLER "LPC1768" CACHE STRING "Target MMC Controller")
-endif()
+set(TARGET_CONTROLLER "LPC1768" CACHE STRING "Target MMC Controller")
 
-if (NOT TARGET_BOARD_NAME)
-  set(TARGET_BOARD_NAME "AFCKU" CACHE STRING "Board Name")
-endif()
+set(TARGET_BOARD_NAME "AFCKU" CACHE STRING "Board Name")
 
 #List all modules used by this board
 set(TARGET_MODULES
   "FRU"
   "PAYLOAD"
   "SDR"
-  # "DAC_AD84XX"
   "HOTSWAP_SENSOR"
   "EEPROM_AT24MAC"
   "LM75"
@@ -59,10 +54,6 @@ if (FRU_WRITE_EEPROM)
   set(FRU_WRITE_EEPROM false CACHE BOOL "Set this flag to enable writing the board ID on the EEPROM" FORCE)
 endif()
 
-#Add flag for disabling SPI
-if (";${TARGET_MODULES};" MATCHES ";DISABLE_SPI;")
-  set(MODULES_FLAGS "${MODULES_FLAGS} -DSPI_DISABLE")
-endif()
 
 #Set the variables in the main scope
 set(TARGET_MODULES ${TARGET_MODULES} PARENT_SCOPE)
