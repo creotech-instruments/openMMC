@@ -64,11 +64,18 @@ set(UCONTROLLER_APP_LD_SCRIPT "")
 add_subdirectory(port/board)
 add_subdirectory(port/ucontroller)
 add_subdirectory(FreeRTOS)
+add_subdirectory(boot)
 add_subdirectory(modules)
 
 include_directories( ${UCONTROLLER_HDRS} ${PROJ_HDRS} )
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTARGET_CONTROLLER=${TARGET_CONTROLLER} -DTARGET_BOARD_NAME=\"${TARGET_BOARD_NAME}\" ")
+
+if(${TARGET_CONTROLLER} MATCHES "^(lpc|LPC)1776")
+  set(CMAKE_EXE_LINKER_FLAGS "-Wl,-gc-sections --specs=nosys.specs -nostdlib -static -nostartfiles")
+else ()
+  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections,--undefined=uxTopUsedPriority --specs=nano.specs -nostartfiles")
+endif()
 
 # Get Git information
 git_describe(GIT_TAG "--tags")

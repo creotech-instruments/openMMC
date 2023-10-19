@@ -37,11 +37,14 @@ elseif(${BOARD} MATCHES "^(afc-v4)$" )
 elseif(${BOARD} MATCHES "^(afcku)$" )
   add_subdirectory(afcku)
 
+elseif(${BOARD} MATCHES "^(afcz)$" )
+  add_subdirectory(afcz)
+
 else()
   message(FATAL_ERROR "${BoldRed}Selected board \"${BOARD}\" is not implemented!${ColourReset}")
 endif()
 
-if(${BOARD} MATCHES "^(afc)")
+if( (${BOARD} MATCHES "^(afc-)") OR (${BOARD} MATCHES "^(afcku)") )
   add_subdirectory(afc-common)
 endif()
 

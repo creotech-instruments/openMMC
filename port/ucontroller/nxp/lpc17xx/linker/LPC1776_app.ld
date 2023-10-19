@@ -1,15 +1,27 @@
 MEMORY
 {
   /* Define each memory region */
-  MFlash256 (rx) : ORIGIN = 0x0, LENGTH = 0x40000 /* 256K bytes (alias Flash) */  
-  RamLoc64 (rwx) : ORIGIN = 0x10000000, LENGTH = 0x10000 /* 64K bytes (alias RAM) */  
-  RamPeriph16 (rwx) : ORIGIN = 0x20000000, LENGTH = 0x4000 /* 16K bytes (alias RAM2) */  
+  /* Last 8 sectors (32kB each) are reserved for firmware upgrade */
+  BootFlash (r)      : ORIGIN = 0x0000, LENGTH = 8K /* 8K bytes */
+  AppFlash (rx)      : ORIGIN = 0x2000, LENGTH = 0x40000 /* 256K bytes (alias Flash) */
+  FWUpdateFlash (r)  : ORIGIN = 0x42000, LENGTH = 0x40000 /* 256K bytes */
+  RamLoc64 (rwx)       : ORIGIN = 0x10000000, LENGTH = 0x10000 /* 64K bytes (alias RAM) */
+  RamPeriph16 (rwx)       : ORIGIN = 0x20000000, LENGTH = 0x4000 /* 16K bytes (alias RAM2) */
 }
+  __BootFlash_start    = 0x0000; /* Bootloader start address (vector table) */
+  __BootFlash_end      = 0x1FFF; /* Bootloader end address (last byte) */
+  __AppFlash_start      = 0x2000; /* Application start address (vector table) */
+  __AppFlash_end        = 0x1FFF + 0x40000;  /* Application end address (last byte) */
+  __FWUpdateFlash_start = 0x42000; /* Firmware update region start address */
+  __FWUpdateFlash_end   = 0x31FFF + 0x40000; /* Firmware update region end address (last byte) */
+
+  /* Last 256 bytes of flash reserved to the fw_info struct */
+  __FWInfo_addr         = __FWUpdateFlash_end - 255;
 
   /* Define a symbol for the top of each memory region */
-  __base_MFlash256 = 0x0  ; /* MFlash256 */  
+  __base_AppFlash = 0x0  ; /* AppFlash */  
   __base_Flash = 0x0 ; /* Flash */  
-  __top_MFlash256 = 0x0 + 0x40000 ; /* 256K bytes */  
+  __top_AppFlash = 0x0 + 0x40000 ; /* 256K bytes */  
   __top_Flash = 0x0 + 0x40000 ; /* 256K bytes */  
   __base_RamLoc64 = 0x10000000  ; /* RamLoc64 */  
   __base_RAM = 0x10000000 ; /* RAM */  
@@ -29,14 +41,16 @@ EXTERN(UsageFault_Handler)
 
 SECTIONS
 {
+
     /* MAIN TEXT SECTION */
     .text : ALIGN(4)
     {
         FILL(0xff)
         __vectors_start__ = ABSOLUTE(.) ;
         KEEP(*(.isr_vector))
+
         /* Global Section Table */
-        . = ALIGN(4) ; 
+        . = ALIGN(4) ;
         __section_table_start = .;
         __data_section_table = .;
         LONG(LOADADDR(.data));
@@ -53,44 +67,45 @@ SECTIONS
         LONG(  SIZEOF(.bss_RAM2));
         __bss_section_table_end = .;
         __section_table_end = . ;
-	    /* End of Global Section Table */
+        /* End of Global Section Table */
 
         *(.after_vectors*)
 
-    } >MFlash256
+    } > AppFlash
 
-    .text : ALIGN(4)    
+    .text : ALIGN(4)
     {
         *(.text*)
         *(.rodata .rodata.* .constdata .constdata.*)
         . = ALIGN(4);
-    } > MFlash256
-    
-	.ipmi_handlers : ALIGN(4)
-	{
-	      _ipmi_handlers = .;
-	      KEEP(*(.ipmi_handlers))
-	      _eipmi_handlers = .;
-	} > MFlash256
-    
+
+    } > AppFlash
+
+    .ipmi_handlers : ALIGN(4)
+    {
+        _ipmi_handlers = .;
+        KEEP(*(.ipmi_handlers))
+        _eipmi_handlers = .;
+    } > AppFlash
+
     /*
      * for exception handling/unwind - some Newlib functions (in common
-     * with C++ and STDC++) use this. 
+     * with C++ and STDC++) use this.
      */
-    .ARM.extab : ALIGN(4) 
+    .ARM.extab : ALIGN(4)
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > MFlash256
+    } > AppFlash
     __exidx_start = .;
 
     .ARM.exidx : ALIGN(4)
     {
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    } > MFlash256
+    } > AppFlash
     __exidx_end = .;
 
     _etext = .;
-        
+
     /* DATA section for RamPeriph16 */
     .data_RAM2 : ALIGN(4)
     {
@@ -102,15 +117,17 @@ SECTIONS
         *(.data.$RamPeriph16*)
         . = ALIGN(4) ;
         PROVIDE(__end_data_RAM2 = .) ;
-     } > RamPeriph16 AT>MFlash256
+    } > RamPeriph16 AT>AppFlash
 
     /* MAIN DATA SECTION */
+
     .uninit_RESERVED : ALIGN(4)
     {
         KEEP(*(.bss.$RESERVED*))
         . = ALIGN(4) ;
         _end_uninit_RESERVED = .;
     } > RamLoc64
+
     /* Main DATA section (RamLoc64) */
     .data : ALIGN(4)
     {
@@ -121,7 +138,8 @@ SECTIONS
        *(.data*)
        . = ALIGN(4) ;
        _edata = . ;
-    } > RamLoc64 AT>MFlash256
+    } > RamLoc64 AT>AppFlash
+
     /* BSS section for RamPeriph16 */
     .bss_RAM2 : ALIGN(4)
     {
@@ -131,6 +149,7 @@ SECTIONS
        . = ALIGN (. != 0 ? 4 : 1) ; /* avoid empty segment */
        PROVIDE(__end_bss_RAM2 = .) ;
     } > RamPeriph16 
+
     /* MAIN BSS SECTION */
     .bss : ALIGN(4)
     {
@@ -141,18 +160,20 @@ SECTIONS
         _ebss = .;
         PROVIDE(end = .);
     } > RamLoc64
+
     /* NOINIT section for RamPeriph16 */
     .noinit_RAM2 (NOLOAD) : ALIGN(4)
     {
        *(.noinit.$RAM2*)
        *(.noinit.$RamPeriph16*)
        . = ALIGN(4) ;
-    } > RamPeriph16 
+    } > RamPeriph16
+
     /* DEFAULT NOINIT SECTION */
     .noinit (NOLOAD): ALIGN(4)
     {
         _noinit = .;
-        *(.noinit*) 
+        *(.noinit*)
          . = ALIGN(4) ;
         _end_noinit = .;
     } > RamLoc64

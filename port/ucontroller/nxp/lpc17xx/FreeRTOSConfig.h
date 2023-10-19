@@ -52,7 +52,11 @@ licensing and training services.
 #define configUSE_IDLE_HOOK                     0
 #define configMAX_PRIORITIES                    ( 6 )
 #define configUSE_TICK_HOOK                     0
-#define configCPU_CLOCK_HZ                      ( ( unsigned long ) 8000000)
+#if defined(CHIP_LPC175X_6X)
+#define configCPU_CLOCK_HZ                      ( ( unsigned long ) 8000000 )
+#else
+#define configCPU_CLOCK_HZ                      ( ( unsigned long ) 80000000 ) // OSC (8 MHz) -> PLL0 (80 MHz) -> CPU CLK
+#endif
 #define configTICK_RATE_HZ                      ( ( portTickType ) 1000 )
 #define configMINIMAL_STACK_SIZE                ( ( unsigned short ) 80 )
 #define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 0x4000 ) )
@@ -86,7 +90,11 @@ void vAssertCalled( char* file, uint32_t line);
 #define configASSERT( x )     if( ( x ) == 0 ) { vAssertCalled( __FILE__, __LINE__ );}
 
 #if (configGENERATE_RUN_TIME_STATS == 1)
-#include "chip_lpc175x_6x.h"
+  #if defined(CHIP_LPC175X_6X)
+    #include "chip_lpc175x_6x.h"
+  #elif defined(CHIP_LPC177X_8X)
+    #include "chip_lpc177x_8x.h"
+  #endif
 extern void vConfigureTimerForRunTimeStats( void );
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() vConfigureTimerForRunTimeStats()
 #define portGET_RUN_TIME_COUNTER_VALUE() LPC_TIMER0->TC

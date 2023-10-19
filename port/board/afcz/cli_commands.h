@@ -22,6 +22,8 @@
 #ifndef CLI_COMMANDS_H_
 #define CLI_COMMANDS_H_
 
+#define CLI_UART LPC_UART3
+
 /**
  * @brief Registers CLI commands.
  */

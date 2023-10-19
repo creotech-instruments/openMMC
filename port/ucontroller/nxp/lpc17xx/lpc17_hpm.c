@@ -26,7 +26,12 @@
  */
 
 /* LPC17xx HPM Functions */
-#include "chip_lpc175x_6x.h"
+#if defined(CHIP_LPC175X_6X)
+  #include "chip_lpc175x_6x.h"
+#elif defined(CHIP_LPC177X_8X)
+  #include "chip_lpc177x_8x.h"
+#endif
+
 #include "lpc17_hpm.h"
 #include "iap.h"
 #include "modules/ipmi.h"

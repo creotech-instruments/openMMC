@@ -30,7 +30,7 @@
 #ifndef __SYS_CONFIG_H_
 #define __SYS_CONFIG_H_
 
-/* Build for 175x/6x chip family */
-#define CHIP_LPC175X_6X
+// /* Build for 175x/6x chip family */
+// #define CHIP_LPC175X_6X    // Now defined in CMakeList file 
 
 #endif /* __SYS_CONFIG_H_ */

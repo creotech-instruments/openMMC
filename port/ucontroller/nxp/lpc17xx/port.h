@@ -32,7 +32,12 @@
 
 /* List of all LPC17xx specific headers to be included */
 
-#include "chip_lpc175x_6x.h"
+#if defined(CHIP_LPC175X_6X)
+  #include "chip_lpc175x_6x.h"
+#elif defined(CHIP_LPC177X_8X)
+  #include "chip_lpc177x_8x.h"
+#endif
+
 #include "lpc17_gpio.h"
 #include "lpc17_i2c.h"
 #include "lpc17_ssp.h"
