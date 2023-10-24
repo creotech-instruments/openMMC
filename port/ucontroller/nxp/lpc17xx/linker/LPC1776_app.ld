@@ -1,22 +1,10 @@
 MEMORY
 {
   /* Define each memory region */
-  /* Last 8 sectors (32kB each) are reserved for firmware upgrade */
-  BootFlash (r)      : ORIGIN = 0x0000, LENGTH = 8K /* 8K bytes */
-  AppFlash (rx)      : ORIGIN = 0x2000, LENGTH = 0x40000 /* 256K bytes (alias Flash) */
-  FWUpdateFlash (r)  : ORIGIN = 0x42000, LENGTH = 0x40000 /* 256K bytes */
-  RamLoc64 (rwx)       : ORIGIN = 0x10000000, LENGTH = 0x10000 /* 64K bytes (alias RAM) */
-  RamPeriph16 (rwx)       : ORIGIN = 0x20000000, LENGTH = 0x4000 /* 16K bytes (alias RAM2) */
+  AppFlash (rx) : ORIGIN = 0x0, LENGTH = 0x40000 /* 256K bytes (alias Flash) */  
+  RamLoc64 (rwx) : ORIGIN = 0x10000000, LENGTH = 0x10000 /* 64K bytes (alias RAM) */  
+  RamPeriph16 (rwx) : ORIGIN = 0x20000000, LENGTH = 0x4000 /* 16K bytes (alias RAM2) */  
 }
-  __BootFlash_start    = 0x0000; /* Bootloader start address (vector table) */
-  __BootFlash_end      = 0x1FFF; /* Bootloader end address (last byte) */
-  __AppFlash_start      = 0x2000; /* Application start address (vector table) */
-  __AppFlash_end        = 0x1FFF + 0x40000;  /* Application end address (last byte) */
-  __FWUpdateFlash_start = 0x42000; /* Firmware update region start address */
-  __FWUpdateFlash_end   = 0x31FFF + 0x40000; /* Firmware update region end address (last byte) */
-
-  /* Last 256 bytes of flash reserved to the fw_info struct */
-  __FWInfo_addr         = __FWUpdateFlash_end - 255;
 
   /* Define a symbol for the top of each memory region */
   __base_AppFlash = 0x0  ; /* AppFlash */  
@@ -41,7 +29,6 @@ EXTERN(UsageFault_Handler)
 
 SECTIONS
 {
-
     /* MAIN TEXT SECTION */
     .text : ALIGN(4)
     {

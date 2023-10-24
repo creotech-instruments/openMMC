@@ -25,8 +25,10 @@
 #include "stopwatch.h"
 #include "tca9539.h"
 #include "idt_8v54816.h"
+#include "si5341.h"
 
 #include "afcz_si5341_LVDS18.h"
+#include "afcz_si5341_config_pts.h"
 #include "afcz_tca9539_clk.h"
 
 static void tca9539_clk_config()
@@ -60,12 +62,12 @@ static void crosspoint_8V54816_config() {
     ret |= clock_switch_set_single_channel(2,  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P);                   // FMC2_CLK0_M2C
     ret |= clock_switch_set_single_channel(3,  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P);                   // FMC1_CLK3_BIDIR (option: FMC1 CLK1 M2C)
     ret |= clock_switch_set_single_channel(4,  IDT_DIR_IN  | IDT_TERM_OFF | IDT_POL_P);                   // Si57X_2 IN
-    ret |= clock_switch_set_single_channel(5,  IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH6);     // MGT_REFCLK0_228 OUT
+    ret |= clock_switch_set_single_channel(5,  IDT_DIR_IN  | IDT_TERM_OFF | IDT_POL_P);                   // MGT_REFCLK0_228 OUT
     ret |= clock_switch_set_single_channel(6,  IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P);                   // Si5341_OUT7 IN (option: TCLKC)
-    ret |= clock_switch_set_single_channel(7,  IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH6);     // MGT_REFCLK0_227 OUT (option: TCLKD)
-    ret |= clock_switch_set_single_channel(8,  IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH6);     // MGT_REFCLK0_226 OUT
-    ret |= clock_switch_set_single_channel(9,  IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH12);    // Si5341_IN1 OUT
-    ret |= clock_switch_set_single_channel(10, IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P);                   // FMC2_CLK2_BIDIR
+    ret |= clock_switch_set_single_channel(7,  IDT_DIR_IN  | IDT_TERM_OFF | IDT_POL_P);                   // MGT_REFCLK0_227 OUT (option: TCLKD)
+    ret |= clock_switch_set_single_channel(8,  IDT_DIR_IN  | IDT_TERM_OFF | IDT_POL_P);                   // MGT_REFCLK0_226 OUT
+    ret |= clock_switch_set_single_channel(9,  IDT_DIR_IN  | IDT_TERM_OFF | IDT_POL_P);                   // Si5341_IN1 OUT
+    ret |= clock_switch_set_single_channel(10, IDT_DIR_OUT | IDT_TERM_OFF | IDT_POL_P | IDT_SRC_CH6);     // FMC2_CLK2_BIDIR
     ret |= clock_switch_set_single_channel(11, IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P);                   // FMC2_CLK3_BIDIR (option: FMC2_CLK1_M2C)
     ret |= clock_switch_set_single_channel(12, IDT_DIR_IN  | IDT_TERM_ON  | IDT_POL_P);                   // RTM_CLK IN (option: AMC_CLK OUT)
     ret |= clock_switch_set_single_channel(13, IDT_DIR_IN  | IDT_TERM_OFF | IDT_POL_P);                   // Si57X IN (option: Si5341_IN0 OUT)
@@ -97,50 +99,71 @@ static void crosspoint_8V54816_config() {
 
 static void si5341_config()
 {
-    uint8_t ret = 0;
+    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, 0, 2, 0x1);
 
-    // Reset
+    // Reset Si5341
     tca9539_output_pin_set(CHIP_ID_TCA9539_CLK, 0, 5, 0x0);
     tca9539_output_pin_set(CHIP_ID_TCA9539_CLK, 0, 5, 0x1);
     StopWatch_DelayMs(100);
 
     uint8_t i2c_interf, i2c_addr;
-    uint8_t data[2];
+
+    uint8_t page;
+    uint8_t addr;
+    uint8_t value, value2;
+    uint8_t data[2] = {0};
 
     // Write configuration
-    if (i2c_take_by_chipid(CHIP_ID_SI5341, &i2c_addr, &i2c_interf, portMAX_DELAY) == pdTRUE) {
-        for (uint8_t i = 0; i < 6; i++) {
-            // extract page address
-            data[0] = 0x01;
-            data[1] = ((si5341_revb_registers[i].address) >> 8) & 0xFF;
-            xI2CMasterWrite(i2c_interf, i2c_addr, data, 2); // set page
+    for (int i = 0; i < SI5341_REVD_REG_CONFIG_NUM_REGS; i++) 
+    {
+      int error = 0;
 
-            data[0] = ((si5341_revb_registers[i].address)) & 0xFF;
-            data[1] = si5341_revb_registers[i].value;
-            ret = xI2CMasterWrite(i2c_interf, i2c_addr, data, 2);
-        }
-        i2c_give(i2c_interf);
+      addr  = 0x01;
+      page  = ((si5341_revd_registers[i].address) >> 8) & 0xFF;
+      error = si5341_write_reg(addr, page);
+
+      addr  = (si5341_revd_registers[i].address) & 0xFF;
+      value = si5341_revd_registers[i].value;
+      error = si5341_write_reg(addr, value);
+
+      if(error < 0)
+        printf("Write %d failed.\n", i);
     }
 
-    StopWatch_DelayMs(300);
+    StopWatch_DelayMs(1000);
 
-    if ( i2c_take_by_chipid( CHIP_ID_SI5341, &i2c_addr, &i2c_interf, portMAX_DELAY) == pdTRUE ) {
-        for (int i = 6; i < SI5341_REVB_REG_CONFIG_NUM_REGS; i++) {
-            // extract page address
-            data[0] = 0x01;
-            data[1] = ((si5341_revb_registers[i].address) >>8) & 0xFF;
-            xI2CMasterWrite( i2c_interf, i2c_addr, data, 2); // set page
+    uint8_t readback;
+    uint16_t page_addr;
+    int err_cnt = 0;
 
-            data[0] = ((si5341_revb_registers[i].address) ) & 0xFF;
-            data[1] = si5341_revb_registers[i].value;
-            ret = xI2CMasterWrite( i2c_interf, i2c_addr, data, 2);
-        }
-        i2c_give( i2c_interf );
+    for(int i = 2; i < SI5341_REVD_REG_CONFIG_NUM_REGS; i++) 
+    {
+      // Set page
+      addr  = 0x01;
+      page  = ((si5341_revd_registers[i].address) >> 8) & 0xFF;
+      si5341_write_reg(addr, page);
+
+      // Read data value
+      addr = si5341_revd_registers[i].address & 0xFF;
+      readback = si5341_read_reg(addr);
+
+      page_addr = (page << 8) | addr;
+      if(page_addr == 0x001c || page_addr == 0x0b57 || page_addr == 0x0b58)   // Self clearing registers
+        continue;
+
+      if(readback != si5341_revd_registers[i].value)
+      {
+        printf("Si5431 readback. Page|Addr: 0x%02x%02x, Data: 0x%02x != 0x%02x (%d)\n", page, addr, readback, si5341_revd_registers[i].value, i);
+        err_cnt++;
+      }
     }
+    
+    if(err_cnt)
+      printf("Si5341 configuration error count = %d/%d\n", err_cnt, SI5341_REVD_REG_CONFIG_NUM_REGS);
+    else  
+      printf("Si5341 configuration - OK.\n");
 
-    if (!ret) {
-        printf("Failed to configure Si5341.\n");
-    }
+    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, 0, 2, 0x0);
 }
 
 static void ethernet_init()
@@ -170,14 +193,16 @@ void board_init(void)
 
 void board_config()
 {
+  #if defined(MODULE_ETHERNET)
     ethernet_init();
+  #endif
 
     /* CLK GPIO expander configuration */
     tca9539_clk_config();
 
     /* CLK cross-point switch configuration */
-    // crosspoint_8V54816_config();
+    crosspoint_8V54816_config();
 
     /* Si5341 configuration */
-    // si5341_config();
+    si5341_config();
 }

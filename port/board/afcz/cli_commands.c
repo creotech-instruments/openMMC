@@ -32,6 +32,7 @@
 
 /* Project Includes */
 #include "cli_commands.h"
+#include "pts_commands.h"
 
 #include "port.h"
 #include "ipmi.h"
@@ -389,6 +390,24 @@ static BaseType_t I2cWriteCommand(char *pcWriteBuffer, size_t xWriteBufferLen, c
     return pdFALSE;
 }
 
+static BaseType_t PtsCommand(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString)
+{
+    char *command = NULL;
+    char response[128] = {0};
+    BaseType_t param_length;
+
+    // Get command
+    command = FreeRTOS_CLIGetParameter((const char *) pcCommandString, 1, &param_length);
+
+    memset(pcWriteBuffer,0,strlen(pcWriteBuffer));
+
+    strcat(pcWriteBuffer, "RSP_START");
+    pts_command(command, response);
+    strcat(pcWriteBuffer, response);
+    strcat(pcWriteBuffer, "RSP_END");
+
+    return pdFALSE;
+}
 
 static const CLI_Command_Definition_t GpioReadCommandDefinition = {
     "gpio_read",
@@ -439,6 +458,13 @@ static const CLI_Command_Definition_t I2cWriteCommandDefinition = {
     -1
 };
 
+static const CLI_Command_Definition_t PtsCommandDefinition = {
+        "pts",
+        "\r\npts <command>:\r\n PTS\r\n",
+        PtsCommand,
+        1
+};
+
 /**
  * @brief Registers all the defined CLI commands.
  */
@@ -456,4 +482,7 @@ void RegisterCLICommands(void)
     // I2C
     FreeRTOS_CLIRegisterCommand(&I2cReadCommandDefinition);
     FreeRTOS_CLIRegisterCommand(&I2cWriteCommandDefinition);
+
+    // PTS
+    FreeRTOS_CLIRegisterCommand(&PtsCommandDefinition);
 }

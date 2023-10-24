@@ -21,9 +21,10 @@ set(TARGET_MODULES
   "INA3221_VOLTAGE"
   "INA3221_CURRENT"
   "XR77129"
-  "HPM"
-  "FLASH_SPI"
-  "SYSUTILS"
+  "SI5341"
+  # "HPM"
+  # "FLASH_SPI"
+  # "SYSUTILS"
   # "RTM"
   # "ETHERNET"
   "UART_DEBUG"
@@ -32,6 +33,7 @@ set(TARGET_MODULES
   "TCA9539"
   "IDT_8V54816"
   "BOARD_CONFIG"
+  "PTS"
   )
 
 set(BOARD_PATH ${CMAKE_CURRENT_SOURCE_DIR})
@@ -49,6 +51,11 @@ endif()
 
 if (";${TARGET_MODULES};" MATCHES ";CLI;")
   set(PROJ_SRCS ${PROJ_SRCS} ${BOARD_PATH}/cli_commands.c)
+endif()
+
+if (";${TARGET_MODULES};" MATCHES ";PTS;")
+  set(PROJ_SRCS ${PROJ_SRCS} ${BOARD_PATH}/pts_commands.c)
+  set(MODULES_FLAGS "${MODULES_FLAGS} -DMODULE_PTS")
 endif()
 
 if (";${TARGET_MODULES};" MATCHES ";BOARD_CONFIG;")

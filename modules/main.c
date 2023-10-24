@@ -42,9 +42,6 @@
 #ifdef MODULE_RTM
 #include "rtm.h"
 #endif
-#ifdef MODULE_BOARD_CONFIG
-#include "board_config.h"
-#endif
 #ifdef MODULE_CLI
 #include "cli.h"
 #endif
@@ -86,18 +83,23 @@ int main( void )
 #ifdef MODULE_SDR
     sdr_init();
 #endif
+
 #ifdef MODULE_SENSORS
     sensor_init();
 #endif
+
 #ifdef MODULE_PAYLOAD
     payload_init();
 #endif
+
 #ifdef MODULE_SCANSTA1101
     scansta1101_init();
 #endif
+
 #ifdef MODULE_FPGA_SPI
     fpga_spi_init();
 #endif
+
 #ifdef MODULE_RTM
     rtm_manage_init();
 #endif
@@ -105,9 +107,6 @@ int main( void )
     /* NOTE: ipmb_init() is called inside this function */
     ipmi_init();
 
-#ifdef MODULE_BOARD_CONFIG
-    board_config();
-#endif
 
 #ifdef MODULE_CLI
     cli_init();
