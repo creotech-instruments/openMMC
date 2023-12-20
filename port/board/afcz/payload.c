@@ -38,30 +38,21 @@
 #include "utils.h"
 #include "fru.h"
 #include "led.h"
-#include "xr77129.h"
 #include "i2c_mapping.h"
 #include "board_led.h"
 #include "tca9539.h"
-#include "xr7724_cfg.h"
 
 #ifdef MODULE_BOARD_CONFIG
 #include "board_config.h"
 #endif
 
-enum
-{
-    EXAR1,
-    EXAR2,
-    EXAR_CNT
-};
 
 TaskHandle_t vTaskPayload_Handle;
 TaskHandle_t vTaskPayloadStatus_Handle;
 
-/* EXAR1 and EXAR2 data */
-xr77129_data_t exar_data[2];
+#define PG_STATUS_UPDATE_RATE 200
 
-bool exar_initialized = false;
+bool power_enabled = false;
 
 /* payload states
  *   0 - no power
@@ -93,16 +84,45 @@ bool exar_initialized = false;
  * 255 - power fail
  */
 
-const external_gpio_t ext_gpios[15] = {
-        [EXT_GPIO_EN_FMC2_P12V]     = { 1, 7 },
-        [EXT_GPIO_EN_RTM_PWR]       = { 1, 6 },
-        [EXT_GPIO_EN_FMC1_P12V]     = { 1, 5 },
-        [EXT_GPIO_EN_VCCINT]        = { 1, 2 },
-        [EXT_GPIO_EN_P5V0]          = { 0, 7 },
-        [EXT_GPIO_EN_RTM_MP]        = { 1, 1 },
-        [EXT_GPIO_EN_PSU_CH]        = { 1, 0 },
-        [EXT_GPIO_FPGA_MUX_RESET]   = { 0, 2 }
+const external_gpio_t ext_gpios[16] = {
+        [EXT_GPIO_EN_FMC2_P12V]    = { 1, 7 },
+        [EXT_GPIO_EN_RTM_PWR]      = { 1, 6 },
+        [EXT_GPIO_EN_FMC1_P12V]    = { 1, 5 },
+        [EXT_GPIO_MMC_FPGA_PROG_B] = { 1, 4 },
+        [EXT_GPIO_EN_1V2]          = { 1, 3 },
+        [EXT_GPIO_EN_VCCINT]       = { 1, 2 },
+        [EXT_GPIO_EN_RTM_MP]       = { 1, 1 },
+        [EXT_GPIO_MMC_FPGA_INIT_B] = { 1, 0 },
+        [EXT_GPIO_EN_1V8]          = { 0, 7 },
+        [EXT_GPIO_EN_P5V0]         = { 0, 6 },
+        [EXT_GPIO_EN_MGT]          = { 0, 5 },
+        [EXT_GPIO_EN_3V3]          = { 0, 4 },
+        [EXT_GPIO_EN_1V2_MGT]      = { 0, 3 },
+        [EXT_GPIO_FPGA_MUX_RESET]  = { 0, 2 },
+        [EXT_GPIO_FPGA_RESETn]     = { 0, 1 },
+        [EXT_GPIO_PS_POR_B]        = { 0, 0 }
 };
+
+#define ext_gpio_set_pin( gpio, state )    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[gpio].port_num, ext_gpios[gpio].pin_num, state);
+
+
+
+//============= TODO Remove after testing prototype
+uint8_t payload_continue = 0;
+
+void suspendPayload(char* msg_return)
+{
+  while(1)
+  {
+    if(payload_continue == 1)
+    {
+      printf("%s\n", msg_return);
+      payload_continue = 0;
+      return;
+    }
+  }
+}
+//============= TODO Remove END
 
 /**
  * @brief Reset FPGA
@@ -111,9 +131,11 @@ const external_gpio_t ext_gpios[15] = {
 
 static void fpga_soft_reset(void)
 {
-    gpio_set_pin_low(PIN_PORT(GPIO_FPGA_RESETn), PIN_NUMBER(GPIO_FPGA_RESETn));
+    // gpio_set_pin_low(PIN_PORT(GPIO_FPGA_RESETn), PIN_NUMBER(GPIO_FPGA_RESETn));
+    ext_gpio_set_pin(EXT_GPIO_FPGA_RESETn, false);
     asm("NOP");
-    gpio_set_pin_high(PIN_PORT(GPIO_FPGA_RESETn), PIN_NUMBER(GPIO_FPGA_RESETn));
+    // gpio_set_pin_high(PIN_PORT(GPIO_FPGA_RESETn), PIN_NUMBER(GPIO_FPGA_RESETn));
+    ext_gpio_set_pin(EXT_GPIO_FPGA_RESETn, true);
 
     /* Blink RED LED to indicate to the user that the Reset was performed */
     LEDUpdate(FRU_AMC, LED1, LEDMODE_LAMPTEST, LEDINIT_ON, 5, 0);
@@ -153,68 +175,7 @@ static void check_fpga_reset(void)
  *
  */
 
-static void exar_init()
-{
-    exar_data[EXAR1].chipid = CHIP_ID_XR7724_1;
-    exar_data[EXAR2].chipid = CHIP_ID_XR7724_2;
-
-    exar_data[EXAR1].gpio_default = 0x0;
-    exar_data[EXAR1].gpio_mask = 0x14;
-    exar_data[EXAR2].gpio_default = 0x10;
-    exar_data[EXAR2].gpio_mask = 0x4;
-
-    for(uint8_t exar_num = EXAR1; exar_num < EXAR_CNT ; exar_num++) {
-        exar_data[exar_num].status_regs_addr[HOST_STS_REG]    = XR77129_GET_HOST_STS;
-        exar_data[exar_num].status_regs_addr[FAULT_STS_REG]   = XR77129_GET_FAULT_STS;
-        exar_data[exar_num].status_regs_addr[PWR_STATUS_REG]  = XR77129_PWR_GET_STATUS;
-        exar_data[exar_num].status_regs_addr[PWR_CHIP_READY]  = XR77129_CHIP_READY;
-        exar_data[exar_num].status_regs_addr[GPIO_STATE]      = XR77129_GPIO_READ_GPIO;
-    }
-}
-
-static void set_exar_OFF(bool get_status)
-{
-    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[EXT_GPIO_EN_RTM_PWR].port_num, ext_gpios[EXT_GPIO_EN_RTM_PWR].pin_num, false);
-
-    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[EXT_GPIO_EN_FMC2_P12V].port_num, ext_gpios[EXT_GPIO_EN_FMC2_P12V].pin_num, false);
-    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[EXT_GPIO_EN_FMC1_P12V].port_num, ext_gpios[EXT_GPIO_EN_FMC1_P12V].pin_num, false);
-
-    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[EXT_GPIO_EN_PSU_CH].port_num, ext_gpios[EXT_GPIO_EN_PSU_CH].pin_num, false);
-
-    // Get EXAR status
-    xr77129_data_t copy_exar_data[2];
-    if (get_status) {
-        for (uint8_t exar_num = EXAR1; exar_num < EXAR_CNT; exar_num++) {
-            copy_exar_data[exar_num].status_regs[HOST_STS_REG]   = exar_data[exar_num].status_regs[HOST_STS_REG];
-            copy_exar_data[exar_num].status_regs[FAULT_STS_REG]  = exar_data[exar_num].status_regs[FAULT_STS_REG];
-            copy_exar_data[exar_num].status_regs[PWR_STATUS_REG] = exar_data[exar_num].status_regs[PWR_STATUS_REG];
-            copy_exar_data[exar_num].status_regs[PWR_CHIP_READY] = exar_data[exar_num].status_regs[PWR_CHIP_READY];
-            copy_exar_data[exar_num].status_regs[GPIO_STATE]     = exar_data[exar_num].status_regs[GPIO_STATE];
-        }
-    }
-
-    xr77129_reset(&exar_data[EXAR2]);
-    vTaskDelay(100);
-
-    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[EXT_GPIO_EN_P5V0].port_num, ext_gpios[EXT_GPIO_EN_P5V0].pin_num, false);
-
-    xr77129_reset(&exar_data[EXAR1]);
-    vTaskDelay(100);
-
-    tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[EXT_GPIO_EN_VCCINT].port_num, ext_gpios[EXT_GPIO_EN_VCCINT].pin_num, false);
-
-    // Print EXAR status
-    if (get_status) {
-        uint16_t val;
-        for (uint8_t exar_num = EXAR1; exar_num < EXAR_CNT; exar_num++) {
-            for (uint8_t reg = 0; reg < XR77129_STATUS_REGISTERS_COUNT; reg++) {
-                val = copy_exar_data[exar_num].status_regs[reg];
-                printf("\nEXAR%d status%d: %d\n", exar_num, reg, val);
-            }
-        }
-    }
-}
-
+/*
 static bool set_exar_ON()
 {
 	uint8_t exar1_programmed = 0;
@@ -293,6 +254,67 @@ static bool set_exar_ON()
 
 	return true;
 }
+*/
+
+
+/**
+ * @brief Set AFCKU's DCDC Converters state
+ *
+ * @param on DCDCs state
+ *
+ */
+
+uint8_t enablePowerSupply(bool enable)
+{
+    uint8_t power_pins[] = {
+      EXT_GPIO_EN_VCCINT,
+      EXT_GPIO_EN_1V2,
+      EXT_GPIO_EN_1V8,
+      EXT_GPIO_EN_1V2_MGT,
+      EXT_GPIO_EN_MGT,
+      EXT_GPIO_EN_3V3,
+      EXT_GPIO_EN_P5V0,
+      EXT_GPIO_EN_FMC1_P12V,
+      EXT_GPIO_EN_FMC2_P12V,
+      EXT_GPIO_EN_RTM_MP,
+      EXT_GPIO_EN_RTM_PWR
+    };
+
+    uint8_t pin;
+    if (enable) 
+    {
+      printf("Enable Power\n");
+
+      for (uint8_t i = 0; i < (sizeof(power_pins) / sizeof(power_pins[0])); i++) 
+      {
+        pin = power_pins[i];
+
+        //============= TODO Remove after testing prototype
+        printf("Send \'continue\' to enable power_pins[%d]\n\r", i);
+        suspendPayload("OK");
+        //============= TODO Remove END
+
+        // tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[pin].port_num, ext_gpios[pin].pin_num, true);
+        ext_gpio_set_pin(pin, true);
+        vTaskDelay(50);
+      }
+    } 
+    else 
+    {
+      printf("Disable Power\n");
+
+      for (uint8_t i = (sizeof(power_pins) / sizeof(power_pins[0])); i > 0; i--) 
+      {
+        pin = power_pins[i];
+        // tca9539_output_pin_set(CHIP_ID_TCA9539_PM, ext_gpios[pin].port_num, ext_gpios[pin].pin_num, false);
+        ext_gpio_set_pin(pin, false);
+        
+        vTaskDelay(10);
+      }
+    }
+    return 1;
+}
+
 
 EventGroupHandle_t amc_payload_evt = NULL;
 #ifdef MODULE_RTM
@@ -330,11 +352,9 @@ void payload_init(void)
     rtm_payload_evt = xEventGroupCreate();
 #endif
 
-    // Load EXAR settings
-    exar_init();
-
     gpio_set_pin_state(PIN_PORT(GPIO_PHY_RESETn), PIN_NUMBER(GPIO_PHY_RESETn), GPIO_LEVEL_LOW);
-    gpio_set_pin_state(PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_LOW);
+    // gpio_set_pin_state(PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_LOW);
+    ext_gpio_set_pin(GPIO_FPGA_PROGRAM_B, false);
 
     // Create power good monitoring task
     xTaskCreate(vTaskPayloadStatus, "PayloadStatus", 256, NULL, tskXR77129_PRIORITY, &vTaskPayloadStatus_Handle);
@@ -359,7 +379,7 @@ void vTaskPayload(void *pvParameters)
     TickType_t xLastWakeTime;
     xLastWakeTime = xTaskGetTickCount();
 
-    /* wait for first DCDC Power Good readout */
+    /* Wait for first DCDC Power Good readout */
     do {
         current_evt = xEventGroupGetBits(amc_payload_evt);
         vTaskDelay(PAYLOAD_BASE_DELAY);
@@ -404,9 +424,9 @@ void vTaskPayload(void *pvParameters)
         }
 
         if (current_evt & PAYLOAD_MESSAGE_REBOOT) {
-            gpio_set_pin_low(PIN_PORT(GPIO_FPGA_RESETn), PIN_NUMBER(GPIO_FPGA_RESETn));
+            ext_gpio_set_pin(EXT_GPIO_FPGA_RESETn, false);
             asm("NOP");
-            gpio_set_pin_high(PIN_PORT(GPIO_FPGA_RESETn), PIN_NUMBER(GPIO_FPGA_RESETn));
+            ext_gpio_set_pin(EXT_GPIO_FPGA_RESETn, true);
             xEventGroupClearBits(amc_payload_evt, PAYLOAD_MESSAGE_REBOOT);
         }
 
@@ -425,12 +445,12 @@ void vTaskPayload(void *pvParameters)
         case PAYLOAD_POWER_GOOD_WAIT:
 
             if (!DCDC_good) {
-                /* Turn DDC converters ON */
-                set_exar_ON();
+                /* Turn DCDC converters ON */
+                enablePowerSupply(true);
             }
 
             vTaskDelay(100);
-            exar_initialized = true;
+            power_enabled = true;
 
             /* Clear hotswap sensor backend power failure bits */
             hotswap_clear_mask_bit( HOTSWAP_AMC, HOTSWAP_BACKEND_PWR_SHUTDOWN_MASK );
@@ -447,10 +467,10 @@ void vTaskPayload(void *pvParameters)
 
                 new_state = PAYLOAD_FPGA_ON;
 
-                gpio_set_pin_state(PIN_PORT(GPIO_FPGA_RESETn), PIN_NUMBER(GPIO_FPGA_RESETn), GPIO_LEVEL_HIGH);
-                gpio_set_pin_state(PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_LOW);
+                ext_gpio_set_pin(GPIO_FPGA_RESETn, true);
+                ext_gpio_set_pin(GPIO_FPGA_PROGRAM_B, false);
                 vTaskDelay(10);
-                gpio_set_pin_state(PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_HIGH);
+                ext_gpio_set_pin(GPIO_FPGA_PROGRAM_B, true);
 
 #ifdef MODULE_RTM
                 payload_send_message(FRU_RTM, PAYLOAD_MESSAGE_RTM_READY);
@@ -476,12 +496,12 @@ void vTaskPayload(void *pvParameters)
             rtm_disable_payload_power();
 #endif
 
-            gpio_set_pin_state(PIN_PORT(GPIO_FPGA_RESETn), PIN_NUMBER(GPIO_FPGA_RESETn), GPIO_LEVEL_LOW);
+            ext_gpio_set_pin(GPIO_FPGA_RESETn, false);
             gpio_set_pin_state(PIN_PORT(GPIO_PHY_RESETn), PIN_NUMBER(GPIO_PHY_RESETn), false);
 
-            /* Turn DDC converters OFF */
-            exar_initialized = false;
-            set_exar_OFF(false);
+            /* Turn DCDC converters OFF */
+            power_enabled = false;
+            enablePowerSupply(false);
 
             if (QUIESCED_req) {
                 hotswap_set_mask_bit(HOTSWAP_AMC, HOTSWAP_QUIESCED_MASK);
@@ -514,20 +534,17 @@ void vTaskPayload(void *pvParameters)
 
 void vTaskPayloadStatus(void *Parameters)
 {
-    const uint8_t POWER_GOOD = 0x1F;
+    const uint8_t POWER_GOOD = 0x03;
 
     /* Power Good flags */
     enum
     {
-        exar1_PG,
-        exar2_PG,
-        P5V0_PG,
-        P0V85_PG,
+        DCDC_PG,
         SDRAM_PG,
         PG_CNT
     };
 
-    const char *power_good_str[] = { "EXAR1", "EXAR2", "P5V0", "P0V85", "SDRAM" };
+    const char *power_good_str[] = { "DCDC_PGOOD", "SDRAM" };
     bool power_supply_msg = true;
 
     uint8_t PG_flag = 0;
@@ -536,7 +553,7 @@ void vTaskPayloadStatus(void *Parameters)
 
     TickType_t xLastWakeTime;
     /* Task will run every 100ms */
-    const TickType_t xFrequency = XR77129_UPDATE_RATE / portTICK_PERIOD_MS;
+    const TickType_t xFrequency = PG_STATUS_UPDATE_RATE / portTICK_PERIOD_MS;
 
     /* Initialize the xLastWakeTime variable with the current time. */
     xLastWakeTime = xTaskGetTickCount();
@@ -546,33 +563,10 @@ void vTaskPayloadStatus(void *Parameters)
         /* Payload power good flag */
         if (gpio_read_pin(PIN_PORT(GPIO_P12V0_OK), PIN_NUMBER(GPIO_P12V0_OK))) {
 
-            /* Read power status of EXAR outputs */
-            for (uint8_t exar_num = EXAR1; exar_num < EXAR_CNT; exar_num++) {
-                xr77129_read_status(&exar_data[exar_num]);
-            }
-
-            if (exar_data[EXAR1].status_regs[PWR_STATUS_REG] == XR77129_POWER_OK) {
-                PG_flag |= 1 << exar1_PG;
+            if (gpio_read_pin(PIN_PORT(GPIO_PGOOD), PIN_NUMBER(GPIO_PGOOD))) {
+                PG_flag |= 1 << DCDC_PG;
             } else {
-                PG_flag &= ~(1 << exar1_PG);
-            }
-
-            if (exar_data[EXAR2].status_regs[PWR_STATUS_REG] == XR77129_POWER_OK) {
-                PG_flag |= 1 << exar2_PG;
-            } else {
-                PG_flag &= ~(1 << exar2_PG);
-            }
-
-            if (gpio_read_pin(PIN_PORT(GPIO_PGOOD_P5V0), PIN_NUMBER(GPIO_PGOOD_P5V0))) {
-                PG_flag |= 1 << P5V0_PG;
-            } else {
-                PG_flag &= ~(1 << P5V0_PG);
-            }
-
-            if (exar_data[EXAR2].status_regs[GPIO_STATE] & XR77129_PSIO2) {
-                PG_flag |= 1 << P0V85_PG;
-            } else {
-                PG_flag &= ~(1 << P0V85_PG);
+                PG_flag &= ~(1 << DCDC_PG);
             }
 
             if (gpio_read_pin(PIN_PORT(GPIO_SDRAM_PGOOD), PIN_NUMBER(GPIO_SDRAM_PGOOD))) {
@@ -597,21 +591,20 @@ void vTaskPayloadStatus(void *Parameters)
         }
 
         /* Display power supply status */
-        if (power_supply_msg && exar_initialized) {
+        if (power_supply_msg && power_enabled) {
             if (PG_flag == POWER_GOOD) {
                 printf("\nPower supply status - OK.\n");
             } else {
                 printf("\nPOWER GOOD error. [");
-                uint8_t j = 0;
+                uint8_t add_space = 0;
                 for (uint8_t i = 0; i < PG_CNT; i++) {
                     if (!((PG_flag >> i) & 0x1)) {
-                        if (j) {
+                        if (add_space++) {
                             printf(" %s", power_good_str[i]);
                         }
                         else {
                             printf("%s", power_good_str[i]);
                         }
-                        j++;
                     }
                 }
                 printf("]\n");
@@ -644,10 +637,10 @@ uint8_t payload_hpm_prepare_comp( void )
     ssp_init( FLASH_SPI, FLASH_SPI_BITRATE, FLASH_SPI_FRAME_SIZE, SSP_MASTER, SSP_INTERRUPT );
 
     /* Prevent the FPGA from accessing the Flash to configure itself now */
-    gpio_set_pin_state( PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_HIGH );
-    gpio_set_pin_state( PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_LOW );
-    gpio_set_pin_state( PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_HIGH );
-    gpio_set_pin_state( PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_LOW );
+    ext_gpio_set_pin(EXT_GPIO_MMC_FPGA_PROG_B, true)
+    ext_gpio_set_pin(EXT_GPIO_MMC_FPGA_PROG_B, false)
+    ext_gpio_set_pin(EXT_GPIO_MMC_FPGA_PROG_B, true)
+    ext_gpio_set_pin(EXT_GPIO_MMC_FPGA_PROG_B, false)
 
     /* Erase FLASH */
     flash_bulk_erase();
@@ -717,8 +710,8 @@ uint8_t payload_hpm_get_upgrade_status( void )
 uint8_t payload_hpm_activate_firmware( void )
 {
     /* Reset FPGA - Pulse PROGRAM_B pin */
-    gpio_set_pin_state( PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_LOW);
-    gpio_set_pin_state( PIN_PORT(GPIO_FPGA_PROGRAM_B), PIN_NUMBER(GPIO_FPGA_PROGRAM_B), GPIO_LEVEL_HIGH);
+    ext_gpio_set_pin(EXT_GPIO_MMC_FPGA_PROG_B, false)
+    ext_gpio_set_pin(EXT_GPIO_MMC_FPGA_PROG_B, true)
 
     return IPMI_CC_OK;
 }

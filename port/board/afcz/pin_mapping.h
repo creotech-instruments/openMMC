@@ -158,8 +158,8 @@
 
 /* DCDC converters */
 /* NOTE: Due to a hardware limitation, pins 29 and 30 from port 0 will have the same direction, even if set differently in the register */
-#define GPIO_P12V0_OK					PIN_DEF( PORT0, 30, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
-#define GPIO_PGOOD_P5V0                 PIN_DEF( PORT1, 22, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
+#define GPIO_P12V0_OK                   PIN_DEF( PORT0, 30, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
+#define GPIO_PGOOD                      PIN_DEF( PORT1, 22, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 #define GPIO_SDRAM_PGOOD                PIN_DEF( PORT2,  7, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 
 /* PMON - INA3221  */
@@ -185,10 +185,7 @@
 #define GPIO_PHY_MII1_INT               PIN_DEF( PORT1, 18, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 
 /* FPGA */
-#define GPIO_FPGA_PROGRAM_B             PIN_DEF( PORT0,  4, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_OUTPUT )
 #define GPIO_FPGA_DONE_B                PIN_DEF( PORT0,  5, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
-#define GPIO_FPGA_RESETn                PIN_DEF( PORT4,  9, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_OUTPUT )
-#define GPIO_FPGA_INITB                 PIN_DEF( PORT0, 13, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 #define GPIO_FPGA_STATUS                PIN_DEF( PORT0, 14, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 #define GPIO_EN_FLASH_UPDATE            PIN_DEF( PORT0, 12, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_OUTPUT )
 
@@ -226,6 +223,8 @@
 #define GPIO_HW_ID1                     PIN_DEF( PORT3, 24, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 #define GPIO_HW_ID2                     PIN_DEF( PORT3, 25, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 #define GPIO_HW_ID3                     PIN_DEF( PORT3, 26, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
+
+#define GPIO_MMC_PS_IO1                 PIN_DEF( PORT4,  31, (IOCON_FUNC0 | IOCON_MODE_INACT), GPIO_DIR_INPUT )
 
 
 /* Pin initialization (config) list */
@@ -294,7 +293,7 @@
         GPIO_FRONT_BUTTON,                      \
         GPIO_HOT_SWAP_HANDLE,                   \
         GPIO_P12V0_OK,                          \
-        GPIO_PGOOD_P5V0,                        \
+        GPIO_PGOOD,                             \
         GPIO_SDRAM_PGOOD,                       \
         GPIO_PMON_CRITICAL,                     \
         GPIO_PMON_PV,                           \
@@ -309,10 +308,7 @@
         GPIO_PHY_RESETn,                        \
         GPIO_PHY_MII1_MODE,                     \
         GPIO_PHY_MII1_INT,                      \
-        GPIO_FPGA_PROGRAM_B,                    \
         GPIO_FPGA_DONE_B,                       \
-        GPIO_FPGA_RESETn,                       \
-        GPIO_FPGA_INITB,                        \
         GPIO_FPGA_STATUS,                       \
         GPIO_EN_FLASH_UPDATE,                   \
         GPIO_PS_ERR_OUT,                        \
@@ -333,6 +329,7 @@
         GPIO_HW_ID1,                            \
         GPIO_HW_ID2,                            \
         GPIO_HW_ID3                             \
+        GPIO_MMC_PS_IO1                         \
 
 #endif
 /**
