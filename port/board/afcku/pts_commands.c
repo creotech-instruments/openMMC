@@ -246,8 +246,4 @@ void pts_command(char *cmd, char *write_buffer)
 	else if (strcmp(cmd, "amc_write_fru") == 0){
 //		amc_write_fru();
 	}
-  
-  else if (strcmp(cmd, "continue") == 0){
-    payload_continue = 0;
-	}
  };

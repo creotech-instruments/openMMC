@@ -132,8 +132,6 @@ uint8_t payload_hpm_get_upgrade_status( void );
 uint8_t payload_hpm_activate_firmware( void );
 #endif
 
-extern uint8_t payload_continue;
-
 #endif /* IPMI_PAYLOAD_H_ */
 
 /**

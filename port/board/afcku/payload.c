@@ -80,20 +80,6 @@ const external_gpio_t ext_gpios[15] = {
         [EXT_GPIO_PROGRAM_B] =       { 0, 0 }
 };
 
-uint8_t payload_continue = 0;
-
-void suspendPayload(char* msg_return)
-{
-  while(1)
-  {
-    if(payload_continue == 1)
-    {
-      printf("%s\n", msg_return);
-      payload_continue = 0;
-      return;
-    }
-  }
-}
 
 /**
  * @brief Set AFCKU's DCDC Converters state
@@ -124,10 +110,6 @@ uint8_t setDC_DC_ConvertersON(bool on)
 
         for (uint8_t i = 0; i < (sizeof(power_pins) / sizeof(power_pins[0])); i++) {
             pin = power_pins[i];
-
-            printf("Send \'continue\' to enable power_pins[%d]\n\r", i);
-            suspendPayload("OK");
-
             mcp23016_write_pin( ext_gpios[pin].port_num, ext_gpios[pin].pin_num, true );
             vTaskDelay(10);
         }
@@ -232,8 +214,6 @@ void payload_init( void )
         while ( gpio_read_pin( PIN_PORT(GPIO_MMC_ENABLE), PIN_NUMBER(GPIO_MMC_ENABLE) ) == 1 ) {};
     }
 
-    payload_continue = 0;
-
     xTaskCreate( vTaskPayload, "Payload", 120, NULL, tskPAYLOAD_PRIORITY, &vTaskPayload_Handle );
 
     amc_payload_evt = xEventGroupCreate();
@@ -319,9 +299,6 @@ void vTaskPayload( void *pvParameters )
             /* Turn DDC converters on */
             if ( DCDC_good == 0 ){
                 setDC_DC_ConvertersON( true );
-
-                printf("PAYLOAD_POWER_GOOD_WAIT finished, send \'continue\'\n\r");
-                suspendPayload("OK");
             }
 
             /* Clear hotswap sensor backend power failure bits */
