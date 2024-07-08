@@ -459,10 +459,10 @@ static const CLI_Command_Definition_t I2cWriteCommandDefinition = {
 };
 
 static const CLI_Command_Definition_t PtsCommandDefinition = {
-        "pts",
-        "\r\npts <command>:\r\n PTS\r\n",
-        PtsCommand,
-        1
+    "pts",
+    "\r\npts <command>:\r\n PTS\r\n",
+    PtsCommand,
+    1
 };
 
 /**

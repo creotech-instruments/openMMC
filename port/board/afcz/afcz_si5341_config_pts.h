@@ -10,7 +10,7 @@
  * Design ID:                                          
  * Includes Pre/Post Download Control Register Writes: Yes
  * Created By:                                         ClockBuilder Pro v4.9 [2023-04-11]
- * Timestamp:                                          2023-09-06 10:17:33 GMT+02:00
+ * Timestamp:                                          2024-07-04 13:46:43 GMT+02:00
  *
  * A complete design report corresponding to this export is included at the end 
  * of this header file.
@@ -78,11 +78,11 @@ si5341_revd_register_t const si5341_revd_registers[SI5341_REVD_REG_CONFIG_NUM_RE
 	{ 0x0044, 0x00 },
 	{ 0x009E, 0x00 },
 	{ 0x0102, 0x01 },
-	{ 0x0108, 0x06 },
+	{ 0x0108, 0x04 },
 	{ 0x0109, 0x09 },
 	{ 0x010A, 0x3E },
 	{ 0x010B, 0x19 },
-	{ 0x010D, 0x06 },
+	{ 0x010D, 0x04 },
 	{ 0x010E, 0x09 },
 	{ 0x010F, 0x3E },
 	{ 0x0110, 0x19 },
@@ -102,11 +102,11 @@ si5341_revd_register_t const si5341_revd_registers[SI5341_REVD_REG_CONFIG_NUM_RE
 	{ 0x0122, 0x09 },
 	{ 0x0123, 0x3E },
 	{ 0x0124, 0x18 },
-	{ 0x0126, 0x01 },
+	{ 0x0126, 0x00 },
 	{ 0x0127, 0x09 },
 	{ 0x0128, 0x3E },
 	{ 0x0129, 0x18 },
-	{ 0x012B, 0x01 },
+	{ 0x012B, 0x00 },
 	{ 0x012C, 0x09 },
 	{ 0x012D, 0x3B },
 	{ 0x012E, 0x28 },
@@ -351,10 +351,10 @@ si5341_revd_register_t const si5341_revd_registers[SI5341_REVD_REG_CONFIG_NUM_RE
  * ========
  * 
  * Part:               Si5341AB Rev D
- * Project File:       C:\Users\mbiernat\OneDrive - Creotech Instruments S.A\Dokumenty\PROJEKTY\[AFCZ]\Si5341 ClockBuilder\Si5341-RevD-Project.slabtimeproj
+ * Project File:       C:\Users\mbiernat\OneDrive - Creotech Instruments S.A\Dokumenty\PROJEKTY\[AFCZ]\Si5341 ClockBuilder\Si5341-RevD-Project_pts_afcz_config.slabtimeproj
  * Design ID:          <none>
  * Created By:         ClockBuilder Pro v4.9 [2023-04-11]
- * Timestamp:          2023-09-06 10:17:32 GMT+02:00
+ * Timestamp:          2024-07-04 13:46:43 GMT+02:00
  * 
  * Design Rule Check
  * =================
@@ -454,13 +454,13 @@ si5341_revd_register_t const si5341_revd_registers[SI5341_REVD_REG_CONFIG_NUM_RE
  * N dividers:
  *    N0:
  *       Value: 14
- *       OUT1: 100 MHz
  *       OUT2: 125 MHz
  *       OUT3: 125 MHz
  *       OUT4: 125 MHz
  *       OUT5: 125 MHz
  *       OUT6: 125 MHz
  *       OUT7: 50 MHz
+ *       OUT8: 100 MHz
  *    N1:
  *       Value: 23.3333333333333333... [ 23 + 1/3 ]
  *       OUT0: 300 MHz
@@ -703,7 +703,7 @@ si5341_revd_register_t const si5341_revd_registers[SI5341_REVD_REG_CONFIG_NUM_RE
  * 0x0131[7:6]   OUT8_CMOS_DRV        0                  0x0              
  * 0x0132[3:0]   OUT8_CM              11                 0xB              
  * 0x0132[6:4]   OUT8_AMPL            3                  0x3              
- * 0x0133[2:0]   OUT8_MUX_SEL         1                  0x1              
+ * 0x0133[2:0]   OUT8_MUX_SEL         0                  0x0              
  * 0x0133[5:4]   OUT8_VDD_SEL         2                  0x2              
  * 0x0133[3]     OUT8_VDD_SEL_EN      1                  0x1              
  * 0x0133[7:6]   OUT8_INV             0                  0x0              
@@ -734,8 +734,8 @@ si5341_revd_register_t const si5341_revd_registers[SI5341_REVD_REG_CONFIG_NUM_RE
  * 0x022C[31:0]  P3_SET               0                  0x00000000       
  * 0x0235[43:0]  M_NUM                939524096000       0x0DAC0000000    
  * 0x023B[31:0]  M_DEN                3221225472         0xC0000000       
- * 0x024A[23:0]  R0_REG               3                  0x000003         
- * 0x024D[23:0]  R1_REG               4                  0x000004         
+ * 0x024A[23:0]  R0_REG               0                  0x000000         
+ * 0x024D[23:0]  R1_REG               0                  0x000000         
  * 0x0250[23:0]  R2_REG               3                  0x000003         
  * 0x0253[23:0]  R3_REG               3                  0x000003         
  * 0x0256[23:0]  R4_REG               3                  0x000003         
@@ -755,7 +755,7 @@ si5341_revd_register_t const si5341_revd_registers[SI5341_REVD_REG_CONFIG_NUM_RE
  * 0x0302[43:0]  N0_NUM               30064771072        0x00700000000    
  * 0x0308[31:0]  N0_DEN               2147483648         0x80000000       
  * 0x030C[0]     N0_UPDATE            0                  0x0              
- * 0x030D[43:0]  N1_NUM               37580963840        0x008C0000000    
+ * 0x030D[43:0]  N1_NUM               75161927680        0x01180000000    
  * 0x0313[31:0]  N1_DEN               3221225472         0xC0000000       
  * 0x0317[0]     N1_UPDATE            0                  0x0              
  * 0x0318[43:0]  N2_NUM               0                  0x00000000000    
